@@ -2,96 +2,154 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Farm-Guru Design System - Nature-inspired agricultural theme */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Backgrounds */
+    --background: 120 20% 98%;
+    --foreground: 140 50% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card System */
+    --card: 120 30% 98%;
+    --card-foreground: 140 50% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Glass Card System */
+    --glass: 120 30% 98% / 0.8;
+    --glass-border: 120 20% 90% / 0.3;
+    --glass-foreground: 140 50% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Popover System */
+    --popover: 120 30% 98%;
+    --popover-foreground: 140 50% 15%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Primary - Deep Forest Green */
+    --primary: 140 60% 25%;
+    --primary-light: 140 50% 35%;
+    --primary-foreground: 120 30% 98%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Secondary - Earth Brown */
+    --secondary: 25 45% 85%;
+    --secondary-dark: 25 40% 25%;
+    --secondary-foreground: 25 40% 15%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Sky Blue */
+    --accent: 200 70% 88%;
+    --accent-dark: 200 60% 40%;
+    --accent-foreground: 200 60% 15%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Muted tones */
+    --muted: 120 15% 92%;
+    --muted-foreground: 120 10% 45%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* System colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --warning: 45 93% 60%;
+    --warning-foreground: 45 85% 15%;
+    --success: 140 70% 45%;
+    --success-foreground: 140 70% 95%;
 
-    --radius: 0.5rem;
+    /* Interactive elements */
+    --border: 120 20% 85%;
+    --input: 120 20% 94%;
+    --ring: 140 60% 25%;
 
-    --sidebar-background: 0 0% 98%;
+    /* Design tokens */
+    --radius: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(140 60% 25%) 0%, hsl(25 40% 25%) 100%);
+    --gradient-sunrise: linear-gradient(135deg, hsl(45 93% 60%) 0%, hsl(25 80% 55%) 50%, hsl(140 60% 25%) 100%);
+    --gradient-field: linear-gradient(180deg, hsl(200 70% 88%) 0%, hsl(140 50% 35%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(120 30% 98% / 0.1) 0%, hsl(120 30% 98% / 0.3) 100%);
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Shadows */
+    --shadow-glass: 0 8px 32px hsl(140 60% 25% / 0.1);
+    --shadow-elevated: 0 20px 40px hsl(140 60% 25% / 0.15);
+    --shadow-soft: 0 4px 16px hsl(120 20% 70% / 0.3);
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Animation */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    /* Sidebar colors */
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 120 30% 96%;
+    --sidebar-foreground: 140 50% 15%;
+    --sidebar-primary: 140 60% 25%;
+    --sidebar-primary-foreground: 120 30% 98%;
+    --sidebar-accent: 120 20% 90%;
+    --sidebar-accent-foreground: 140 50% 15%;
+    --sidebar-border: 120 20% 85%;
+    --sidebar-ring: 140 60% 25%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark mode - Deep forest night theme */
+    --background: 140 30% 8%;
+    --foreground: 120 20% 92%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 140 25% 10%;
+    --card-foreground: 120 20% 92%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --glass: 140 25% 10% / 0.8;
+    --glass-border: 140 20% 20% / 0.3;
+    --glass-foreground: 120 20% 92%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --popover: 140 25% 10%;
+    --popover-foreground: 120 20% 92%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --primary: 140 50% 60%;
+    --primary-light: 140 45% 70%;
+    --primary-foreground: 140 30% 8%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --secondary: 25 30% 15%;
+    --secondary-dark: 25 35% 35%;
+    --secondary-foreground: 25 20% 85%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 200 50% 20%;
+    --accent-dark: 200 60% 50%;
+    --accent-foreground: 200 50% 90%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --muted: 140 20% 15%;
+    --muted-foreground: 140 15% 60%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --warning: 45 85% 55%;
+    --warning-foreground: 45 85% 10%;
+    --success: 140 60% 50%;
+    --success-foreground: 140 60% 10%;
+
+    --border: 140 20% 20%;
+    --input: 140 20% 15%;
+    --ring: 140 50% 60%;
+
+    /* Dark gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(140 30% 8%) 0%, hsl(25 30% 12%) 100%);
+    --gradient-sunrise: linear-gradient(135deg, hsl(45 60% 30%) 0%, hsl(25 50% 25%) 50%, hsl(140 30% 15%) 100%);
+    --gradient-field: linear-gradient(180deg, hsl(200 40% 15%) 0%, hsl(140 30% 12%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(140 25% 10% / 0.1) 0%, hsl(140 25% 10% / 0.3) 100%);
+
+    /* Dark shadows */
+    --shadow-glass: 0 8px 32px hsl(0 0% 0% / 0.3);
+    --shadow-elevated: 0 20px 40px hsl(0 0% 0% / 0.4);
+    --shadow-soft: 0 4px 16px hsl(0 0% 0% / 0.2);
+
+    --sidebar-background: 140 30% 6%;
+    --sidebar-foreground: 120 20% 85%;
+    --sidebar-primary: 140 50% 50%;
+    --sidebar-primary-foreground: 140 30% 8%;
+    --sidebar-accent: 140 25% 12%;
+    --sidebar-accent-foreground: 120 20% 85%;
+    --sidebar-border: 140 20% 15%;
+    --sidebar-ring: 140 50% 60%;
   }
+}
+
 }
 
 @layer base {
@@ -100,6 +158,72 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-medium antialiased;
+    background: var(--gradient-field);
+    min-height: 100vh;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Glass effect utilities */
+  .glass {
+    @apply backdrop-blur-md bg-glass border border-glass-border shadow-glass;
+  }
+
+  .glass-card {
+    @apply glass rounded-radius-lg p-6;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/20 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/30;
+  }
+}
+
+@layer components {
+  /* Hero gradient text */
+  .hero-text {
+    background: var(--gradient-sunrise);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Animated underline */
+  .link-underline {
+    @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
+  }
+
+  /* Button hover animations */
+  .btn-hover {
+    @apply transition-all duration-300 hover:scale-105 hover:shadow-elevated;
+  }
+
+  /* Page transition base */
+  .page-transition {
+    @apply animate-in fade-in-0 slide-in-from-bottom-4 duration-500;
+  }
+
+  /* Mobile safe area */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
   }
 }
