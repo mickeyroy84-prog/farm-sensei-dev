@@ -44,20 +44,18 @@ const WeatherPage = () => {
     try {
       const data = await apiClient.getWeather(selectedState, selectedDistrict);
       setWeatherData(data);
+      analytics.track('weather_data_fetched', { 
+        state: selectedState, 
+        district: selectedDistrict,
+        source: data.meta?.source 
+      });
     } catch (error) {
       console.error('Weather fetch failed:', error);
-      
-      // Fallback demo data
-      setWeatherData({
-        forecast: {
-          temperature: 28,
-          humidity: 65,
-          rainfall: 2.5,
-          description: language === 'en' ? 'Partly cloudy with chance of light rain' : 'हल्की बारिश की संभावना के साथ आंशिक रूप से बादल'
-        },
-        recommendation: language === 'en' 
-          ? 'Good conditions for irrigation. Delay pesticide application due to expected rainfall.'
-          : 'सिंचाई के लिए अच्छी स्थिति। अपेक्षित वर्षा के कारण कीटनाशक का छिड़काव स्थगित करें।'
+      analytics.errorOccurred('weather_fetch_failed', 'WeatherPage');
+      toast({
+        title: "Weather data unavailable",
+        description: error instanceof Error ? error.message : "Please try again later",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -238,6 +236,16 @@ const WeatherPage = () => {
                     {weatherData.recommendation}
                   </p>
                 </div>
+                {weatherData.meta?.source && (
+                  <div className="mt-3 pt-3 border-t border-border/30">
+                    <p className="text-xs text-muted-foreground">
+                      Data source: {weatherData.meta.source}
+                      {weatherData.last_updated && (
+                        <span> • Updated: {new Date(weatherData.last_updated).toLocaleString()}</span>
+                      )}
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

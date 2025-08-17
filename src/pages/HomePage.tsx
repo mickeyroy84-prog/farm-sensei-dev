@@ -174,6 +174,7 @@ const HomePage = () => {
                 className="btn-hover border-primary/30 text-foreground hover:bg-primary/10 px-8 py-4 text-lg font-semibold rounded-radius-lg"
               >
                 <Link to="/query">
+                  onClick={() => analytics.track('cta_clicked', { button: 'ask_ai_assistant', location: 'hero' })}
                   <SparklesIcon className="w-5 h-5 mr-2" />
                   {language === 'en' ? 'Ask AI Assistant' : 'AI सहायक से पूछें'}
                 </Link>
@@ -281,6 +282,7 @@ const HomePage = () => {
                       className="mt-auto group-hover:bg-primary/10 transition-colors"
                     >
                       <Link to={feature.href}>
+                        onClick={() => analytics.track('feature_card_clicked', { feature: feature.title, href: feature.href })}
                         {language === 'en' ? 'Explore' : 'एक्सप्लोर करें'} →
                       </Link>
                     </Button>

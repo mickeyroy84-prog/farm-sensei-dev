@@ -12,12 +12,16 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '@/lib/i18n';
 import { analytics } from '@/lib/analytics';
-import pricesData from '@/data/prices.json';
+import { apiClient, MarketResponse } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 const MarketPage = () => {
   const [selectedCommodity, setSelectedCommodity] = useState('tomato');
   const [selectedMandi, setSelectedMandi] = useState('Bengaluru');
+  const [marketData, setMarketData] = useState<MarketResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { t, language } = useTranslation();
+  const { toast } = useToast();
 
   const commodities = [
     { value: 'tomato', label: language === 'en' ? 'Tomato' : 'टमाटर' },
@@ -30,23 +34,49 @@ const MarketPage = () => {
     'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow'
   ];
 
-  const currentData = pricesData[selectedCommodity as keyof typeof pricesData];
-  const latestPrice = currentData[currentData.length - 1]?.price || 0;
-  const previousPrice = currentData[currentData.length - 2]?.price || 0;
-  const priceChange = latestPrice - previousPrice;
-  const priceChangePercent = previousPrice ? ((priceChange / previousPrice) * 100) : 0;
+  const fetchMarketData = async () => {
+    if (!selectedCommodity || !selectedMandi) return;
 
-  // Calculate 7-day average
-  const sevenDayAverage = currentData.reduce((sum, item) => sum + item.price, 0) / currentData.length;
+    setIsLoading(true);
+    analytics.featureUsed('market_data_view');
 
-  // Generate trading signal
-  const getSignal = () => {
-    if (latestPrice > sevenDayAverage * 1.05) return 'SELL';
-    if (latestPrice < sevenDayAverage * 0.95) return 'BUY';
-    return 'HOLD';
+    try {
+      const data = await apiClient.getMarketData(selectedCommodity, selectedMandi);
+      setMarketData(data);
+      analytics.track('market_data_fetched', { 
+        commodity: selectedCommodity, 
+        mandi: selectedMandi,
+        source: data.meta?.source 
+      });
+    } catch (error) {
+      console.error('Market data fetch failed:', error);
+      analytics.errorOccurred('market_fetch_failed', 'MarketPage');
+      toast({
+        title: "Market data unavailable",
+        description: error instanceof Error ? error.message : "Please try again later",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const signal = getSignal();
+  useEffect(() => {
+    fetchMarketData();
+  }, [selectedCommodity, selectedMandi]);
+
+  // Calculate derived values from market data
+  const latestPrice = marketData?.latest_price || 0;
+  const sevenDayAverage = marketData?.seven_day_ma || 0;
+  const signal = marketData?.signal || 'HOLD';
+  const currentData = marketData?.history || [];
+  
+  const priceChange = currentData.length >= 2 
+    ? latestPrice - currentData[currentData.length - 2].price 
+    : 0;
+  const priceChangePercent = currentData.length >= 2 && currentData[currentData.length - 2].price > 0
+    ? ((priceChange / currentData[currentData.length - 2].price) * 100) 
+    : 0;
 
   const getSignalColor = (signal: string) => {
     switch (signal) {
@@ -63,10 +93,6 @@ const MarketPage = () => {
       default: return 'bg-warning/10';
     }
   };
-
-  useEffect(() => {
-    analytics.featureUsed('market_data_view');
-  }, [selectedCommodity, selectedMandi]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -130,6 +156,27 @@ const MarketPage = () => {
           </CardContent>
         </Card>
 
+        {/* Loading State */}
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-8"
+          >
+            <ChartBarIcon className="w-12 h-12 mx-auto text-warning animate-pulse mb-4" />
+            <p className="text-lg font-medium text-muted-foreground">
+              {language === 'en' ? 'Fetching market data...' : 'बाजार डेटा प्राप्त कर रहे हैं...'}
+            </p>
+          </motion.div>
+        )}
+
+        {/* Market Data */}
+        {marketData && !isLoading && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
         {/* Price Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="glass-card">
@@ -221,6 +268,7 @@ const MarketPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {currentData.length > 0 ? (
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={currentData}>
@@ -257,6 +305,21 @@ const MarketPage = () => {
                 </LineChart>
               </ResponsiveContainer>
             </div>
+            ) : (
+              <div className="h-80 flex items-center justify-center text-muted-foreground">
+                <p>{language === 'en' ? 'No price data available' : 'कोई मूल्य डेटा उपलब्ध नहीं'}</p>
+              </div>
+            )}
+            {marketData.meta?.source && (
+              <div className="mt-4 pt-4 border-t border-border/30">
+                <p className="text-xs text-muted-foreground">
+                  Data source: {marketData.meta.source}
+                  {marketData.meta.note && (
+                    <span> • {marketData.meta.note}</span>
+                  )}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -343,6 +406,8 @@ const MarketPage = () => {
             </CardContent>
           </Card>
         </div>
+          </motion.div>
+        )}
       </motion.div>
     </div>
   );

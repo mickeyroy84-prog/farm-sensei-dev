@@ -14,7 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '@/lib/i18n';
 import { analytics } from '@/lib/analytics';
-import { apiClient, QueryResponse } from '@/lib/api';
+import { apiClient, QueryResponse, UploadResponse } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
 const QueryPage = () => {
@@ -23,6 +23,7 @@ const QueryPage = () => {
   const [isListening, setIsListening] = useState(false);
   const [response, setResponse] = useState<QueryResponse | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<UploadResponse | null>(null);
   const { t, language } = useTranslation();
   const { toast } = useToast();
 
@@ -42,49 +43,53 @@ const QueryPage = () => {
     analytics.querySubmitted('text');
 
     try {
+      let imageId: string | undefined = undefined;
+      
       // If there's an image, upload it first
-      let imageId = undefined;
       if (imageFile) {
-        const uploadResult = await apiClient.uploadImage(imageFile);
-        imageId = uploadResult.image_id;
+        try {
+          const uploadResult = await apiClient.uploadImage(imageFile);
+          setUploadedImage(uploadResult);
+          imageId = uploadResult.image_id;
+          
+          toast({
+            title: "Image uploaded successfully",
+            description: `Detected: ${uploadResult.label} (${Math.round(uploadResult.confidence * 100)}% confidence)`,
+          });
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+          toast({
+            title: "Image upload failed",
+            description: "Proceeding with text query only",
+            variant: "destructive",
+          });
+        }
       }
 
-      const result = await apiClient.query({
+      // Submit query
+      const queryResult = await apiClient.query({
         text: query,
         lang: language,
         image_id: imageId,
       });
 
-      setResponse(result);
+      setResponse(queryResult);
       analytics.track('query_completed', { 
-        confidence: result.confidence,
+        confidence: queryResult.confidence,
         has_image: !!imageId 
       });
 
       toast({
         title: "Query completed",
-        description: `Confidence: ${Math.round(result.confidence * 100)}%`,
+        description: `Confidence: ${Math.round(queryResult.confidence * 100)}%`,
       });
     } catch (error) {
       console.error('Query failed:', error);
       analytics.errorOccurred('query_failed', 'QueryPage');
       
-      // Fallback response for demo
-      setResponse({
-        answer: language === 'en' 
-          ? "I'm sorry, I couldn't process your query right now. Please try again later or consult your local agricultural expert."
-          : "मुझे खुशी है कि मैं अभी आपके प्रश्न का उत्तर नहीं दे सका। कृपया बाद में पुनः प्रयास करें या अपने स्थानीय कृषि विशेषज्ञ से सलाह लें।",
-        confidence: 0.3,
-        actions: [
-          language === 'en' ? "Consult local KVK" : "स्थानीय KVK से सलाह लें",
-          language === 'en' ? "Try asking differently" : "अलग तरीके से पूछने की कोशिश करें"
-        ],
-        sources: []
-      });
-
       toast({
         title: "Query failed",
-        description: "Using fallback response. Please check your connection.",
+        description: error instanceof Error ? error.message : "Please check your connection and try again.",
         variant: "destructive",
       });
     } finally {
@@ -199,10 +204,18 @@ const QueryPage = () => {
               <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-radius">
                 <PhotoIcon className="w-5 h-5 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">{imageFile.name}</span>
+                {uploadedImage && (
+                  <span className="text-xs text-success">
+                    ✓ {uploadedImage.label} ({Math.round(uploadedImage.confidence * 100)}%)
+                  </span>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setImageFile(null)}
+                  onClick={() => {
+                    setImageFile(null);
+                    setUploadedImage(null);
+                  }}
                   className="ml-auto text-xs"
                 >
                   Remove
@@ -262,7 +275,10 @@ const QueryPage = () => {
             <div className="inline-flex items-center gap-2 text-primary">
               <SparklesIcon className="w-6 h-6 animate-pulse" />
               <span className="text-lg font-medium">
-                {language === 'en' ? 'AI is thinking...' : 'AI सोच रहा है...'}
+                {imageFile && !uploadedImage 
+                  ? (language === 'en' ? 'Analyzing image...' : 'छवि का विश्लेषण कर रहे हैं...')
+                  : (language === 'en' ? 'AI is thinking...' : 'AI सोच रहा है...')
+                }
               </span>
             </div>
           </motion.div>
@@ -295,6 +311,12 @@ const QueryPage = () => {
                         </Badge>
                       );
                     })()}
+                    {response.meta?.mode && (
+                      <Badge variant="secondary" className="text-xs">
+                        {response.meta.mode === 'demo' ? 'Demo Mode' : 
+                         response.meta.mode === 'fallback' ? 'Fallback' : 'AI'}
+                      </Badge>
+                    )}
                   </div>
                 </CardTitle>
               </CardHeader>
@@ -348,6 +370,7 @@ const QueryPage = () => {
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-xs text-primary hover:underline"
+                            onClick={() => analytics.track('source_clicked', { url: source.url, title: source.title })}
                           >
                             {source.url}
                           </a>
@@ -355,6 +378,26 @@ const QueryPage = () => {
                       </div>
                     ))}
                   </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Show demo mode banner if applicable */}
+            {response?.meta?.mode === 'demo' && (
+              <Card className="glass-card border-warning/50 bg-warning/5">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-warning">
+                    <ExclamationTriangleIcon className="w-5 h-5" />
+                    <span className="font-medium">
+                      {language === 'en' ? 'Demo Mode' : 'डेमो मोड'}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {language === 'en' 
+                      ? 'This response was generated using fallback logic. For production use, configure HF_API_KEY.'
+                      : 'यह प्रतिक्रिया फॉलबैक लॉजिक का उपयोग करके उत्पन्न की गई थी। उत्पादन उपयोग के लिए, HF_API_KEY कॉन्फ़िगर करें।'
+                    }
+                  </p>
                 </CardContent>
               </Card>
             )}

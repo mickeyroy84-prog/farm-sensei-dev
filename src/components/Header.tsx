@@ -80,6 +80,7 @@ const Header = () => {
                   ? 'text-primary bg-primary/10'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }`}
+              onClick={() => analytics.track('nav_clicked', { page: link.href, label: link.label })}
             >
               {link.label}
               {location.pathname === link.href && (
@@ -156,6 +157,10 @@ const Header = () => {
                     ? 'text-primary bg-primary/10'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  analytics.track('mobile_nav_clicked', { page: link.href, label: link.label });
+                }}
               >
                 {link.label}
               </Link>
